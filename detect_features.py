@@ -97,6 +97,26 @@ print("Surface / atmosphere coverage (% of visible disk):")
 for k, v in stats.items():
     print(f"  {k:<15}{v:6.2f}%")
 
+# A short, rule-based explanation from the measured class coverage. This is
+# generated from this run's output; it is not a trained vision-language model.
+ranked_classes = sorted(stats.items(), key=lambda item: item[1], reverse=True)
+summary_lines = [
+    "This NASA EPIC image shows the visible disk of Earth against black space.",
+    "The image was segmented into approximate ocean, cloud, land, smoke/haze, "
+    "and coastal/hazy-water classes using colour rules.",
+    "Estimated coverage of the visible Earth disk:",
+]
+summary_lines.extend(f"- {name}: {value:.1f}%" for name, value in ranked_classes)
+summary_lines.extend([
+    "The red box in annotated_result.png marks a region classified as a "
+    "possible smoke plume; yellow outlines mark large cloud regions.",
+    "These are approximate image-based labels, not validated scientific "
+    "measurements. Smoke detection uses a manually selected region and "
+    "colour thresholds, so results may not transfer to other images.",
+])
+with open("image_explanation.txt", "w", encoding="utf-8") as explanation_file:
+    explanation_file.write("\n".join(summary_lines) + "\n")
+
 # ---------- 6. Save figure ----------
 fig, ax = plt.subplots(2, 2, figsize=(14, 14))
 ax[0, 0].imshow(rgb);        ax[0, 0].set_title("1. Original NASA EPIC image")
@@ -112,3 +132,4 @@ plt.savefig("feature_detection_result.png", dpi=110)
 cv2.imwrite("segmentation_only.png", cv2.cvtColor(seg, cv2.COLOR_RGB2BGR))
 cv2.imwrite("annotated_result.png", cv2.cvtColor(annot, cv2.COLOR_RGB2BGR))
 print("Saved: feature_detection_result.png, segmentation_only.png, annotated_result.png")
+print("Saved: image_explanation.txt")
